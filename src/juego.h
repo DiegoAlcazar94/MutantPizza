@@ -7,9 +7,9 @@
 #define TFT_CS   5
 #define TFT_RST  4
 #define TFT_DC   2
-#define PIN_IZQ  25
+#define PIN_IZQ  27
 #define PIN_CEN  26
-#define PIN_DER  27
+#define PIN_DER  25
 
 // ============================================================
 // PANTALLA

@@ -19,7 +19,7 @@ const int X_CARRILES[3] = { 26, 80, 133 };
 
 // Tipos de objeto
 #define OBJ_VACIO      0
-#define OBJ_CHAMPIÑON  1
+#define OBJ_CHAMPINON  1
 #define OBJ_PEPERONI   2
 #define OBJ_BACON      3
 #define OBJ_RATA       4
@@ -56,7 +56,7 @@ static void dibujarObjeto(Objeto& obj) {
   int x = X_CARRILES[obj.carril] - 8;
 
   switch (obj.tipo) {
-    case OBJ_CHAMPIÑON: tft.setTextColor(COLOR_BLANCO);  break;
+    case OBJ_CHAMPINON: tft.setTextColor(COLOR_BLANCO);  break;
     case OBJ_PEPERONI:  tft.setTextColor(COLOR_ROJO);    break;
     case OBJ_BACON:     tft.setTextColor(COLOR_NARANJA); break;
     case OBJ_RATA:      tft.setTextColor(COLOR_GRIS);    break;
@@ -66,7 +66,7 @@ static void dibujarObjeto(Objeto& obj) {
   tft.setCursor(x, obj.y);
 
   switch (obj.tipo) {
-    case OBJ_CHAMPIÑON: tft.print("[C]"); break;
+    case OBJ_CHAMPINON: tft.print("[C]"); break;
     case OBJ_PEPERONI:  tft.print("[P]"); break;
     case OBJ_BACON:     tft.print("[B]"); break;
     case OBJ_RATA:      tft.print("[R]"); break;
@@ -98,7 +98,7 @@ static void spawnearObjeto() {
       if (random(0, 4) == 0 && spawnsHastaAhora % 5 == 0) {
         objetos[i].tipo = OBJ_RATA;
       } else {
-        objetos[i].tipo = random(OBJ_CHAMPIÑON, OBJ_BACON + 1);
+        objetos[i].tipo = random(OBJ_CHAMPINON, OBJ_BACON + 1);
       }
 
       spawnsHastaAhora++;

@@ -67,39 +67,23 @@ void leerBotones() {
       break;
 
     case PANTALLA_MASCOTA:
-      // Central abre el menú
-      if (pulsadoCen) {
-        juego.iconoSeleccionado = 0;
-        juego.pantallaActual    = PANTALLA_MENU;
-        ultimoTiempo = ahora;
-      }
-      break;
-
-    case PANTALLA_MENU:
-      // Izquierda navega por los iconos
+      // Izquierda navega entre iconos (0-6, saltamos el 7)
       if (pulsadoIzq) {
-        juego.iconoSeleccionado = (juego.iconoSeleccionado + 7) % 8;
+        juego.iconoSeleccionado = (juego.iconoSeleccionado + 1) % 7;
         ultimoTiempo = ahora;
       }
       // Central entra en la función seleccionada
       if (pulsadoCen) {
-        // 0=Comer 1=Luz 2=Jugar 3=Curar 4=Limpiar 5=Stats 6=Disciplina 7=EstadoAlterado
-        // La luz se activa/desactiva directamente sin pantalla intermedia
+        uint8_t destinos[] = {
+          PANTALLA_COMER, PANTALLA_LUZ, PANTALLA_JUGAR, PANTALLA_CURAR,
+          PANTALLA_LIMPIAR, PANTALLA_STATS, PANTALLA_DISCIPLINA
+        };
+        // La luz se activa directamente sin ir a otra pantalla
         if (juego.iconoSeleccionado == 1) {
           juego.luzApagada = !juego.luzApagada;
-          // Nos quedamos en el menú para que el jugador vea el cambio
         } else {
-          uint8_t destinos[] = {
-            PANTALLA_COMER, PANTALLA_LUZ, PANTALLA_JUGAR, PANTALLA_CURAR,
-            PANTALLA_LIMPIAR, PANTALLA_STATS, PANTALLA_DISCIPLINA, PANTALLA_ESTADO_ALTERADO
-          };
           juego.pantallaActual = destinos[juego.iconoSeleccionado];
         }
-        ultimoTiempo = ahora;
-      }
-      // Derecha sale del menú y vuelve a la mascota
-      if (pulsadoDer) {
-        juego.pantallaActual = PANTALLA_MASCOTA;
         ultimoTiempo = ahora;
       }
       break;

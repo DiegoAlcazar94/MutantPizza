@@ -2,7 +2,7 @@
 
 void iniciarJuego() {
   juego.pantallaActual      = PANTALLA_ANIMACION_HUEVO;
-  juego.hambre              = 5;
+  juego.temperatura         = 5;
   juego.energia             = 5;
   juego.felicidad           = 5;
   juego.desobediencia       = 0;
@@ -20,7 +20,7 @@ void iniciarJuego() {
   juego.edadEnMinutos       = 0;
   juego.minutosEnFaseActual = 0;
   juego.iconoSeleccionado   = 0;
-  juego.diasSinComer        = 0;
+  juego.diasSinCalor        = 0;
   juego.diasSinLimpiar      = 0;
   juego.diasEnfermo         = 0;
   juego.diasSinFeliz        = 0;
@@ -28,7 +28,7 @@ void iniciarJuego() {
 
 // --- Comprueba si la mascota debe morir ---
 static void comprobarMuerte() {
-  if (juego.diasSinComer   >= DIAS_SIN_COMER)   juego.viva = false;
+  if (juego.diasSinCalor   >= DIAS_SIN_CALOR)   juego.viva = false;
   if (juego.diasSinLimpiar >= DIAS_SIN_LIMPIAR)  juego.viva = false;
   if (juego.diasEnfermo    >= DIAS_ENFERMO)       juego.viva = false;
   if (juego.diasSinFeliz   >= DIAS_SIN_FELIZ)     juego.viva = false;
@@ -104,7 +104,7 @@ void tickJuego() {
 
   // Bajar stats cada minuto (solo si no está durmiendo)
   if (!juego.durmiendo) {
-    if (juego.hambre    > 0) juego.hambre--;
+    if (juego.temperatura    > 0) juego.temperatura--;
     if (juego.felicidad > 0) juego.felicidad--;
   }
 
@@ -126,7 +126,7 @@ void tickJuego() {
 
   // Contadores de días en mal estado (cada 1440 minutos = 1 día)
   if (juego.edadEnMinutos % 1440 == 0) {
-    if (juego.hambre    == 0) juego.diasSinComer++;    else juego.diasSinComer    = 0;
+    if (juego.temperatura    == 0) juego.diasSinCalor++;    else juego.diasSinCalor    = 0;
     if (juego.sucia)          juego.diasSinLimpiar++;  else juego.diasSinLimpiar  = 0;
     if (juego.enferma)        juego.diasEnfermo++;     else juego.diasEnfermo     = 0;
     if (juego.felicidad == 0) juego.diasSinFeliz++;    else juego.diasSinFeliz    = 0;

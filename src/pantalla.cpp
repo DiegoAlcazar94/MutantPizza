@@ -48,20 +48,60 @@ static void dibujarSetearHora() {
 // --- Pantalla principal con la mascota ---
 static void dibujarMascota() {
   tft.fillScreen(COLOR_NEGRO);
-  tft.setTextColor(COLOR_BLANCO);
-  tft.setTextSize(1);
-  tft.setCursor(50, 55);
-  tft.print("[MASCOTA]");
-  tft.setCursor(30, 75);
-  tft.print("Pulsa CENTRO: menu");
 
-  // Mostrar reloj arriba a la derecha
-  tft.setCursor(100, 5);
+  // Reloj arriba a la derecha
+  tft.setTextSize(1);
+  tft.setTextColor(COLOR_GRIS);
+  tft.setCursor(110, 5);
   if (juego.hora < 10) tft.print("0");
   tft.print(juego.hora);
   tft.print(":");
   if (juego.minutos < 10) tft.print("0");
   tft.print(juego.minutos);
+
+  // Copo de nieve arriba a la izquierda si temperatura <= 2
+  if (juego.temperatura <= 2) {
+    tft.setTextColor(COLOR_AZUL);
+    tft.setTextSize(2);
+    tft.setCursor(5, 2);
+    tft.print("*");  // placeholder del copo hasta tener sprite
+  }
+
+  // Zs de sueño si es de noche y luz apagada
+  if (juego.durmiendo && juego.luzApagada) {
+    tft.setTextColor(COLOR_BLANCO);
+    tft.setTextSize(1);
+    tft.setCursor(70, 20);
+    if (frameActual == 0) {
+      tft.print("z");
+    } else {
+      tft.print("z z");
+    }
+  }
+
+  // Mascota en el centro (placeholder hasta tener sprites)
+  tft.setTextColor(COLOR_BLANCO);
+  tft.setTextSize(1);
+  tft.setCursor(50, 60);
+  tft.print("[MASCOTA]");
+
+  // Indicador de suciedad abajo a la izquierda
+  if (juego.sucia) {
+    tft.setTextColor(COLOR_NARANJA);
+    tft.setCursor(5, 110);
+    tft.print("~ sucia ~");
+  }
+
+  // Indicador de enfermedad abajo a la derecha
+  if (juego.enferma) {
+    tft.setTextColor(COLOR_ROJO);
+    tft.setCursor(100, 110);
+    tft.print("+ enferma");
+  }
+
+  tft.setTextColor(COLOR_GRIS);
+  tft.setCursor(35, 100);
+  tft.print("CENTRO: menu");
 }
 
 // --- Menú de 8 funciones ---
@@ -112,11 +152,37 @@ static void dibujarMenu() {
 
 // --- Pantallas de funciones (placeholders) ---
 static void dibujarComer() {
+  // Solo ejecutamos la animación una vez al entrar
+  // El copo de nieve en pantalla principal avisará cuando haga falta
+
+  // Frame 1 — microondas cerrado
   tft.fillScreen(COLOR_NEGRO);
-  tft.setTextColor(COLOR_NARANJA);
-  tft.setTextSize(2);
-  tft.setCursor(20, 50);
-  tft.print("COMER");
+  tft.setTextColor(COLOR_BLANCO);
+  tft.setTextSize(1);
+  tft.setCursor(40, 30);
+  tft.print("[MICROONDAS]");
+  tft.setCursor(55, 50);
+  tft.print("[  pizza  ]");
+  tft.setCursor(55, 65);
+  tft.print("[_________]");
+  tft.setCursor(40, 85);
+  tft.setTextColor(COLOR_GRIS);
+  tft.print("Precalentando...");
+  delay(750);
+
+  // Frame 2 — microondas girando (punto rotatorio simple)
+  tft.fillRect(55, 50, 70, 16, COLOR_NEGRO);
+  tft.setTextColor(COLOR_AMARILLO);
+  tft.setCursor(55, 50);
+  tft.print("[ *pizza* ]");
+  delay(750);
+
+  // Subir temperatura al máximo
+  juego.temperatura    = 5;
+  juego.diasSinCalor   = 0;
+
+  // Volver al menú automáticamente
+  juego.pantallaActual = PANTALLA_MENU;
 }
 
 static void dibujarLuz() {
@@ -169,7 +235,7 @@ static void dibujarStats() {
   tft.fillScreen(COLOR_NEGRO);
   tft.setTextSize(1);
   tft.setTextColor(COLOR_BLANCO);
-  tft.setCursor(5, 10);  tft.print("HAMBRE:   "); tft.print(juego.hambre);
+  tft.setCursor(5, 10);  tft.print("TEMP:"); tft.print(juego.temperatura);
   tft.setCursor(5, 25);  tft.print("ENERGIA:  "); tft.print(juego.energia);
   tft.setCursor(5, 40);  tft.print("FELICIDAD:"); tft.print(juego.felicidad);
   tft.setCursor(5, 55);  tft.print("DESOB:    "); tft.print(juego.desobediencia);
@@ -197,7 +263,7 @@ static void dibujarEstadoAlterado() {
   if (juego.enferma)             tft.print("! ENFERMA");
   if (juego.sucia)               { tft.setCursor(5, 55); tft.print("! SUCIA"); }
   if (juego.desobediencia >= 4)  { tft.setCursor(5, 70); tft.print("! PELIGRO MALDICION"); }
-  if (juego.hambre == 0)         { tft.setCursor(5, 85); tft.print("! SIN HAMBRE"); }
+  if (juego.temperatura == 0)         { tft.setCursor(5, 85); tft.print("! SIN CALOR"); }
 }
 
 static void dibujarMuerte() {

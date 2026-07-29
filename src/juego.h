@@ -40,7 +40,7 @@
 #define HORA_DESPERTAR  7        // 7am
 
 // Días sin atender antes de morir por cada causa
-#define DIAS_SIN_COMER    2
+#define DIAS_SIN_CALOR    2
 #define DIAS_SIN_LIMPIAR  5
 #define DIAS_ENFERMO      3
 #define DIAS_SIN_FELIZ    5
@@ -83,7 +83,7 @@ struct EstadoJuego {
   uint8_t pantallaActual;
 
   // --- Stats (0 a 5) ---
-  uint8_t hambre;
+  uint8_t temperatura;
   uint8_t energia;
   uint8_t felicidad;
   uint8_t desobediencia; // al llegar a 5 en fases iniciales -> adulto maldito
@@ -93,7 +93,7 @@ struct EstadoJuego {
   bool sucia;
 
   // --- Contadores de días en mal estado (para muerte) ---
-  uint8_t diasSinComer;
+  uint8_t diasSinCalor;
   uint8_t diasSinLimpiar;
   uint8_t diasEnfermo;
   uint8_t diasSinFeliz;

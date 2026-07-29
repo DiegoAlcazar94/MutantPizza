@@ -1,4 +1,5 @@
 #include "botones.h"
+#include "minijuego.h"
 
 // Estado anterior de cada botón para detectar solo el momento de la pulsación
 static int ultimoIzq = HIGH;
@@ -158,11 +159,16 @@ void leerBotones() {
       break;
 
     case PANTALLA_JUGAR:
-      // El minijuego gestiona sus propios botones
-      // lo haremos cuando lleguemos a esa fase
-      if (pulsadoDer) {
-        juego.pantallaActual = PANTALLA_MENU;
-        ultimoTiempo = ahora;
+      if (minijuegoActivo) {
+        if (pulsadoIzq) { botonMinijuegoIzq(); ultimoTiempo = ahora; }
+        if (pulsadoCen) { botonMinijuegoCen(); ultimoTiempo = ahora; }
+        if (pulsadoDer) { botonMinijuegoDer(); ultimoTiempo = ahora; }
+      } else {
+        // Minijuego terminado, DER vuelve al menú
+        if (pulsadoDer) {
+          juego.pantallaActual = PANTALLA_MENU;
+          ultimoTiempo = ahora;
+        }
       }
       break;
 

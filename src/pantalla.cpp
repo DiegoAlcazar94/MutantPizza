@@ -1,4 +1,5 @@
 #include "pantalla.h"
+#include "minijuego.h"
 
 // Frame actual de animación (alterna entre 0 y 1 cada 500ms)
 static uint8_t frameActual = 0;
@@ -335,17 +336,17 @@ static void dibujarEvolucion() {
 }
 
 static void dibujarJugar() {
-  tft.fillScreen(COLOR_NEGRO);
-  tft.setTextColor(COLOR_VERDE);
-  tft.setTextSize(2);
-  tft.setCursor(20, 50);
-  tft.print("JUGAR");
-  tft.setTextSize(1);
-  tft.setTextColor(COLOR_GRIS);
-  tft.setCursor(10, 90);
-  tft.print("Minijuego proximamente");
-  tft.setCursor(10, 105);
-  tft.print("DER: volver");
+  // La primera vez que entramos iniciamos el minijuego
+  static bool minijuegoIniciado = false;
+  static uint8_t pantallaAnterior = PANTALLA_MENU;
+
+  if (pantallaAnterior != PANTALLA_JUGAR) {
+    iniciarMinijuego();
+    minijuegoIniciado = true;
+  }
+  pantallaAnterior = juego.pantallaActual;
+
+  actualizarMinijuego();
 }
 
 // ============================================================

@@ -187,48 +187,87 @@ static void dibujarComer() {
 
 static void dibujarLuz() {
   tft.fillScreen(COLOR_NEGRO);
-  tft.setTextColor(COLOR_AMARILLO);
   tft.setTextSize(2);
   tft.setCursor(20, 40);
   if (juego.luzApagada) {
+    tft.setTextColor(COLOR_GRIS);
     tft.print("LUZ: OFF");
   } else {
-    tft.print("LUZ: ON");
+    tft.setTextColor(COLOR_AMARILLO);
+    tft.print("LUZ:  ON");
   }
-  // Al entrar en esta función alternamos la luz directamente
-  juego.luzApagada = !juego.luzApagada;
-}
-
-static void dibujarJugar() {
-  tft.fillScreen(COLOR_NEGRO);
-  tft.setTextColor(COLOR_VERDE);
-  tft.setTextSize(2);
-  tft.setCursor(20, 50);
-  tft.print("JUGAR");
+  tft.setTextSize(1);
+  tft.setTextColor(COLOR_GRIS);
+  tft.setCursor(20, 90);
+  tft.print("DER: volver");
 }
 
 static void dibujarCurar() {
   tft.fillScreen(COLOR_NEGRO);
+  tft.setTextSize(1);
   tft.setTextColor(COLOR_AZUL);
-  tft.setTextSize(2);
-  tft.setCursor(20, 50);
+  tft.setCursor(20, 30);
   tft.print("CURAR");
   if (juego.enferma) {
-    juego.enferma        = false;
-    juego.diasEnfermo    = 0;
+    tft.setTextColor(COLOR_BLANCO);
+    tft.setCursor(10, 55);
+    tft.print("Mascota enferma.");
+    tft.setCursor(10, 70);
+    tft.print("CENTRO: curar");
+  } else {
+    tft.setTextColor(COLOR_VERDE);
+    tft.setCursor(10, 55);
+    tft.print("Esta sanita!");
   }
+  tft.setTextColor(COLOR_GRIS);
+  tft.setCursor(10, 100);
+  tft.print("DER: volver");
 }
 
 static void dibujarLimpiar() {
   tft.fillScreen(COLOR_NEGRO);
+  tft.setTextSize(1);
   tft.setTextColor(COLOR_VERDE);
-  tft.setTextSize(2);
-  tft.setCursor(20, 50);
+  tft.setCursor(20, 30);
   tft.print("LIMPIAR");
   if (juego.sucia) {
-    juego.sucia          = false;
-    juego.diasSinLimpiar = 0;
+    tft.setTextColor(COLOR_BLANCO);
+    tft.setCursor(10, 55);
+    tft.print("Mascota sucia.");
+    tft.setCursor(10, 70);
+    tft.print("CENTRO: limpiar");
+  } else {
+    tft.setTextColor(COLOR_VERDE);
+    tft.setCursor(10, 55);
+    tft.print("Esta limpita!");
   }
+  tft.setTextColor(COLOR_GRIS);
+  tft.setCursor(10, 100);
+  tft.print("DER: volver");
+}
+
+static void dibujarDisciplina() {
+  tft.fillScreen(COLOR_NEGRO);
+  tft.setTextSize(1);
+  tft.setTextColor(COLOR_ROJO);
+  tft.setCursor(10, 30);
+  tft.print("DISCIPLINA");
+  tft.setTextColor(COLOR_BLANCO);
+  tft.setCursor(10, 55);
+  tft.print("Desob: ");
+  tft.print(juego.desobediencia);
+  tft.print("/5");
+  if (juego.desobediencia > 0) {
+    tft.setCursor(10, 75);
+    tft.print("CENTRO: reprimenda");
+  } else {
+    tft.setTextColor(COLOR_VERDE);
+    tft.setCursor(10, 75);
+    tft.print("Bien portada!");
+  }
+  tft.setTextColor(COLOR_GRIS);
+  tft.setCursor(10, 100);
+  tft.print("DER: volver");
 }
 
 static void dibujarStats() {
@@ -242,15 +281,6 @@ static void dibujarStats() {
   tft.setCursor(5, 70);  tft.print("SUCIA:    "); tft.print(juego.sucia ? "SI" : "NO");
   tft.setCursor(5, 85);  tft.print("ENFERMA:  "); tft.print(juego.enferma ? "SI" : "NO");
   tft.setCursor(5, 100); tft.print("FASE:     "); tft.print(juego.fase);
-}
-
-static void dibujarDisciplina() {
-  tft.fillScreen(COLOR_NEGRO);
-  tft.setTextColor(COLOR_ROJO);
-  tft.setTextSize(2);
-  tft.setCursor(10, 40);
-  tft.print("DISCIPLINA");
-  if (juego.desobediencia > 0) juego.desobediencia--;
 }
 
 static void dibujarEstadoAlterado() {

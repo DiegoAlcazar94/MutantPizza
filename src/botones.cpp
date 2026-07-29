@@ -83,11 +83,17 @@ void leerBotones() {
       // Central entra en la función seleccionada
       if (pulsadoCen) {
         // 0=Comer 1=Luz 2=Jugar 3=Curar 4=Limpiar 5=Stats 6=Disciplina 7=EstadoAlterado
-        uint8_t destinos[] = {
-          PANTALLA_COMER, PANTALLA_LUZ, PANTALLA_JUGAR, PANTALLA_CURAR,
-          PANTALLA_LIMPIAR, PANTALLA_STATS, PANTALLA_DISCIPLINA, PANTALLA_ESTADO_ALTERADO
-        };
-        juego.pantallaActual = destinos[juego.iconoSeleccionado];
+        // La luz se activa/desactiva directamente sin pantalla intermedia
+        if (juego.iconoSeleccionado == 1) {
+          juego.luzApagada = !juego.luzApagada;
+          // Nos quedamos en el menú para que el jugador vea el cambio
+        } else {
+          uint8_t destinos[] = {
+            PANTALLA_COMER, PANTALLA_LUZ, PANTALLA_JUGAR, PANTALLA_CURAR,
+            PANTALLA_LIMPIAR, PANTALLA_STATS, PANTALLA_DISCIPLINA, PANTALLA_ESTADO_ALTERADO
+          };
+          juego.pantallaActual = destinos[juego.iconoSeleccionado];
+        }
         ultimoTiempo = ahora;
       }
       // Derecha sale del menú y vuelve a la mascota
@@ -97,14 +103,54 @@ void leerBotones() {
       }
       break;
 
-    case PANTALLA_STATS:
     case PANTALLA_LUZ:
+      if (pulsadoDer) {
+        juego.pantallaActual = PANTALLA_MENU;
+        ultimoTiempo = ahora;
+      }
+      break;
+
     case PANTALLA_CURAR:
+      if (pulsadoCen) {
+        if (juego.enferma) {
+          juego.enferma     = false;
+          juego.diasEnfermo = 0;
+        }
+        ultimoTiempo = ahora;
+      }
+      if (pulsadoDer) {
+        juego.pantallaActual = PANTALLA_MENU;
+        ultimoTiempo = ahora;
+      }
+      break;
+
     case PANTALLA_LIMPIAR:
+      if (pulsadoCen) {
+        if (juego.sucia) {
+          juego.sucia          = false;
+          juego.diasSinLimpiar = 0;
+        }
+        ultimoTiempo = ahora;
+      }
+      if (pulsadoDer) {
+        juego.pantallaActual = PANTALLA_MENU;
+        ultimoTiempo = ahora;
+      }
+      break;
+
     case PANTALLA_DISCIPLINA:
+      if (pulsadoCen) {
+        if (juego.desobediencia > 0) juego.desobediencia--;
+        ultimoTiempo = ahora;
+      }
+      if (pulsadoDer) {
+        juego.pantallaActual = PANTALLA_MENU;
+        ultimoTiempo = ahora;
+      }
+      break;
+
+    case PANTALLA_STATS:
     case PANTALLA_ESTADO_ALTERADO:
-    case PANTALLA_COMER:
-      // En todas estas pantallas, derecha vuelve al menú
       if (pulsadoDer) {
         juego.pantallaActual = PANTALLA_MENU;
         ultimoTiempo = ahora;

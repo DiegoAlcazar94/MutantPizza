@@ -334,6 +334,20 @@ static void dibujarEvolucion() {
   tft.fillScreen(COLOR_NEGRO);
 }
 
+static void dibujarJugar() {
+  tft.fillScreen(COLOR_NEGRO);
+  tft.setTextColor(COLOR_VERDE);
+  tft.setTextSize(2);
+  tft.setCursor(20, 50);
+  tft.print("JUGAR");
+  tft.setTextSize(1);
+  tft.setTextColor(COLOR_GRIS);
+  tft.setCursor(10, 90);
+  tft.print("Minijuego proximamente");
+  tft.setCursor(10, 105);
+  tft.print("DER: volver");
+}
+
 // ============================================================
 // FUNCIÓN PRINCIPAL — se llama cada 500ms desde main.cpp
 // ============================================================

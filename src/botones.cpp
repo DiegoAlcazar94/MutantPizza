@@ -1,5 +1,6 @@
 #include "botones.h"
 #include "minijuego.h"
+#include "sonidos.h"
 
 // Estado anterior de cada botón para detectar solo el momento de la pulsación
 static int ultimoIzq = HIGH;
@@ -70,10 +71,12 @@ void leerBotones() {
       // Izquierda navega entre iconos (0-6, saltamos el 7)
       if (pulsadoIzq) {
         juego.iconoSeleccionado = (juego.iconoSeleccionado + 1) % 7;
+        sonarNavegacion();
         ultimoTiempo = ahora;
       }
       // Central entra en la función seleccionada
       if (pulsadoCen) {
+        sonarAccion();
         uint8_t destinos[] = {
           PANTALLA_COMER, PANTALLA_LUZ, PANTALLA_JUGAR, PANTALLA_CURAR,
           PANTALLA_LIMPIAR, PANTALLA_STATS, PANTALLA_DISCIPLINA

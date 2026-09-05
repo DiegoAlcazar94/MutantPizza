@@ -6,6 +6,7 @@
 #include "botones.h"
 #include "pantalla.h"
 #include "fases.h"
+#include "sonidos.h"
 
 // ============================================================
 // AQUÍ se define la variable global del juego
@@ -30,6 +31,9 @@ void setup() {
 
   // Iniciar botones
   iniciarBotones();
+
+  // Iniciar sonido
+  iniciarSonido();
 
   // Iniciar estado del juego
   iniciarJuego();

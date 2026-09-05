@@ -10,10 +10,10 @@
 #define PIN_IZQ  27
 #define PIN_CEN  26
 #define PIN_DER  25
+#define PIN_BUZZER 32
 
 // ============================================================
 // PANTALLA
-// Con setRotation(1): 160px ancho x 128px alto
 // ============================================================
 #define ANCHO  160
 #define ALTO   128
@@ -33,20 +33,19 @@
 // ============================================================
 // TIEMPOS
 // ============================================================
-#define MS_TICK         60000UL  // 1 minuto real
-#define DIAS_BEBE       5        // días que dura cada fase
-#define MINUTOS_NACER   15       // minutos desde guardar hora hasta nacer
-#define HORA_DORMIR     23       // 11pm
-#define HORA_DESPERTAR  7        // 7am
-
-// Días sin atender antes de morir por cada causa
-#define DIAS_SIN_CALOR    2
-#define DIAS_SIN_LIMPIAR  5
-#define DIAS_ENFERMO      3
-#define DIAS_SIN_FELIZ    5
+#define MS_TICK         60000UL
+#define DIAS_BEBE       5
+#define MINUTOS_NACER   15
+#define HORA_DORMIR     23
+#define HORA_DESPERTAR  7
+#define DIAS_SIN_CALOR  2
+#define DIAS_SIN_LIMPIAR 5
+#define DIAS_ENFERMO    3
+#define DIAS_SIN_FELIZ  5
+#define SEGUNDOS_REINICIO 10
 
 // ============================================================
-// FASES DE VIDA
+// FASES
 // ============================================================
 #define FASE_HUEVO       0
 #define FASE_BEBE        1
@@ -56,60 +55,51 @@
 #define FASE_MALDITO     5
 
 // ============================================================
-// PANTALLAS / ESTADOS DEL JUEGO
-// Esto controla qué se muestra en cada momento
+// PANTALLAS
 // ============================================================
-#define PANTALLA_ANIMACION_HUEVO  0  // rider en moto, bucle infinito
-#define PANTALLA_SETEAR_HORA      1  // configurar hora con botones
-#define PANTALLA_MASCOTA          2  // pantalla principal con la pet
-#define PANTALLA_MENU             3  // menú de 8 funciones
-#define PANTALLA_COMER            4  // función comer
-#define PANTALLA_LUZ              5  // función luz
-#define PANTALLA_JUGAR            6  // minijuego
-#define PANTALLA_CURAR            7  // función curar
-#define PANTALLA_LIMPIAR          8  // función limpiar
-#define PANTALLA_STATS            9  // función stats
-#define PANTALLA_DISCIPLINA       10 // función disciplina
-#define PANTALLA_ESTADO_ALTERADO  11 // función estado alterado
-#define PANTALLA_MUERTE           12 // pantalla de muerte
-#define PANTALLA_EVOLUCION        13 // animación de evolución
-
-// Zumbador
-#define PIN_BUZZER  32
-
-// Reinicio en pantalla de muerte
-#define SEGUNDOS_REINICIO  10
+#define PANTALLA_ANIMACION_HUEVO  0
+#define PANTALLA_SETEAR_HORA      1
+#define PANTALLA_MASCOTA          2
+#define PANTALLA_MENU             3
+#define PANTALLA_COMER            4
+#define PANTALLA_LUZ              5
+#define PANTALLA_JUGAR            6
+#define PANTALLA_CURAR            7
+#define PANTALLA_LIMPIAR          8
+#define PANTALLA_STATS            9
+#define PANTALLA_DISCIPLINA       10
+#define PANTALLA_ESTADO_ALTERADO  11
+#define PANTALLA_MUERTE           12
+#define PANTALLA_EVOLUCION        13
 
 // ============================================================
 // ESTADO DEL JUEGO
 // ============================================================
 struct EstadoJuego {
-
-  // Qué se muestra ahora mismo
   uint8_t pantallaActual;
 
-  // --- Stats (0 a 5) ---
+  // Stats
   uint8_t temperatura;
   uint8_t energia;
   uint8_t felicidad;
-  uint8_t desobediencia; // al llegar a 5 en fases iniciales -> adulto maldito
+  uint8_t desobediencia;
 
-  // --- Salud ---
+  // Salud
   bool enferma;
   bool sucia;
 
-  // --- Contadores de días en mal estado (para muerte) ---
+  // Contadores de días en mal estado
   uint8_t diasSinCalor;
   uint8_t diasSinLimpiar;
   uint8_t diasEnfermo;
   uint8_t diasSinFeliz;
 
-  // --- Fase de vida ---
+  // Fase
   uint8_t fase;
-  bool    maldita;       // true si llegó al máximo de desobediencia
+  bool    maldita;
   bool    viva;
 
-  // --- Reloj ---
+  // Reloj
   uint8_t hora;
   uint8_t minutos;
   bool    horaConfigurada;
@@ -117,17 +107,19 @@ struct EstadoJuego {
   bool    durmiendo;
   bool    silenciado;
 
-  // --- Progresión ---
-  uint32_t edadEnMinutos;     // minutos desde que nació
-  uint32_t minutosEnFaseActual; // para saber cuándo evolucionar
+  // Progresión
+  uint32_t edadEnMinutos;
+  uint32_t minutosEnFaseActual;
 
-  // --- Menú ---
-  uint8_t iconoSeleccionado;  // 0-7, qué icono está seleccionado ahora
+  // Menú
+  uint8_t iconoSeleccionado;
+
+  // Muerte
+  bool sonidoMuerteReproducido;
+
+  // Reinicio muerte (contador de botones)
+  unsigned long tiempoBotonMuerte;
+  bool botonesLateralesMuerte;
 };
 
-// ============================================================
-// VARIABLE GLOBAL
-// extern significa "este juego existe, está definido en main.cpp"
-// Cualquier archivo que incluya juego.h puede usarlo
-// ============================================================
 extern EstadoJuego juego;

@@ -10,3 +10,6 @@ extern Adafruit_ST7735 tft;
 
 // Se llama cada 500ms desde el loop para actualizar lo que se ve
 void actualizarPantalla();
+
+// Para parar el sonido de muerte
+void resetearSonidoMuerte();

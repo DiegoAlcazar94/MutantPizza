@@ -1,8 +1,9 @@
 #include "botones.h"
 #include "minijuego.h"
 #include "sonidos.h"
+#include "juego.h"
+#include "fases.h"
 
-// Estado anterior de cada botón para detectar solo el momento de la pulsación
 static int ultimoIzq = HIGH;
 static int ultimoCen = HIGH;
 static int ultimoDer = HIGH;
@@ -23,12 +24,11 @@ void leerBotones() {
   int cen = digitalRead(PIN_CEN);
   int der = digitalRead(PIN_DER);
 
-  // Detectamos pulsación (paso de HIGH a LOW)
   bool pulsadoIzq = (izq == LOW && ultimoIzq == HIGH);
   bool pulsadoCen = (cen == LOW && ultimoCen == HIGH);
   bool pulsadoDer = (der == LOW && ultimoDer == HIGH);
 
-  // Silenciar con los dos laterales a la vez
+  // Silenciar con dos laterales a la vez
   if (pulsadoIzq && pulsadoDer) {
     juego.silenciado = !juego.silenciado;
     ultimoTiempo = ahora;
@@ -37,11 +37,32 @@ void leerBotones() {
     return;
   }
 
-  // Actuar según qué pantalla estamos viendo
+  // Reinicio en pantalla de muerte manteniendo botones laterales
+  if (juego.pantallaActual == PANTALLA_MUERTE) {
+    bool ambosLaterales = (izq == LOW && der == LOW);
+    if (ambosLaterales) {
+      if (!juego.botonesLateralesMuerte) {
+        juego.botonesLateralesMuerte = true;
+        juego.tiempoBotonMuerte      = ahora;
+      } else if (ahora - juego.tiempoBotonMuerte >= (unsigned long)SEGUNDOS_REINICIO * 1000) {
+        // Han pasado 10 segundos con botones pulsados — reiniciar
+        juego.sonidoMuerteReproducido = false;
+        juego.botonesLateralesMuerte  = false;
+        iniciarJuego();
+      }
+    } else {
+      juego.botonesLateralesMuerte = false;
+      juego.tiempoBotonMuerte      = 0;
+    }
+    ultimoIzq = izq;
+    ultimoCen = cen;
+    ultimoDer = der;
+    return;
+  }
+
   switch (juego.pantallaActual) {
 
     case PANTALLA_ANIMACION_HUEVO:
-      // Solo el botón central lleva a configurar la hora
       if (pulsadoCen) {
         juego.pantallaActual = PANTALLA_SETEAR_HORA;
         ultimoTiempo = ahora;
@@ -49,17 +70,14 @@ void leerBotones() {
       break;
 
     case PANTALLA_SETEAR_HORA:
-      // Izquierda sube la hora
       if (pulsadoIzq) {
         juego.hora = (juego.hora + 1) % 24;
         ultimoTiempo = ahora;
       }
-      // Central cambia entre hora y minutos (lo gestionamos con una variable local)
       if (pulsadoCen) {
         juego.minutos = (juego.minutos + 1) % 60;
         ultimoTiempo = ahora;
       }
-      // Derecha guarda la hora y vuelve al huevo
       if (pulsadoDer) {
         juego.horaConfigurada = true;
         juego.pantallaActual  = PANTALLA_ANIMACION_HUEVO;
@@ -68,23 +86,20 @@ void leerBotones() {
       break;
 
     case PANTALLA_MASCOTA:
-      // Izquierda navega entre iconos (0-6, saltamos el 7)
       if (pulsadoIzq) {
         juego.iconoSeleccionado = (juego.iconoSeleccionado + 1) % 7;
         sonarNavegacion();
         ultimoTiempo = ahora;
       }
-      // Central entra en la función seleccionada
       if (pulsadoCen) {
         sonarAccion();
-        uint8_t destinos[] = {
-          PANTALLA_COMER, PANTALLA_LUZ, PANTALLA_JUGAR, PANTALLA_CURAR,
-          PANTALLA_LIMPIAR, PANTALLA_STATS, PANTALLA_DISCIPLINA
-        };
-        // La luz se activa directamente sin ir a otra pantalla
         if (juego.iconoSeleccionado == 1) {
           juego.luzApagada = !juego.luzApagada;
         } else {
+          uint8_t destinos[] = {
+            PANTALLA_COMER, PANTALLA_LUZ, PANTALLA_JUGAR, PANTALLA_CURAR,
+            PANTALLA_LIMPIAR, PANTALLA_STATS, PANTALLA_DISCIPLINA
+          };
           juego.pantallaActual = destinos[juego.iconoSeleccionado];
         }
         ultimoTiempo = ahora;
@@ -93,7 +108,7 @@ void leerBotones() {
 
     case PANTALLA_LUZ:
       if (pulsadoDer) {
-        juego.pantallaActual = PANTALLA_MENU;
+        juego.pantallaActual = PANTALLA_MASCOTA;
         ultimoTiempo = ahora;
       }
       break;
@@ -103,11 +118,12 @@ void leerBotones() {
         if (juego.enferma) {
           juego.enferma     = false;
           juego.diasEnfermo = 0;
+          sonarCurar();
         }
         ultimoTiempo = ahora;
       }
       if (pulsadoDer) {
-        juego.pantallaActual = PANTALLA_MENU;
+        juego.pantallaActual = PANTALLA_MASCOTA;
         ultimoTiempo = ahora;
       }
       break;
@@ -117,11 +133,12 @@ void leerBotones() {
         if (juego.sucia) {
           juego.sucia          = false;
           juego.diasSinLimpiar = 0;
+          sonarLimpiar();
         }
         ultimoTiempo = ahora;
       }
       if (pulsadoDer) {
-        juego.pantallaActual = PANTALLA_MENU;
+        juego.pantallaActual = PANTALLA_MASCOTA;
         ultimoTiempo = ahora;
       }
       break;
@@ -132,7 +149,7 @@ void leerBotones() {
         ultimoTiempo = ahora;
       }
       if (pulsadoDer) {
-        juego.pantallaActual = PANTALLA_MENU;
+        juego.pantallaActual = PANTALLA_MASCOTA;
         ultimoTiempo = ahora;
       }
       break;
@@ -140,7 +157,7 @@ void leerBotones() {
     case PANTALLA_STATS:
     case PANTALLA_ESTADO_ALTERADO:
       if (pulsadoDer) {
-        juego.pantallaActual = PANTALLA_MENU;
+        juego.pantallaActual = PANTALLA_MASCOTA;
         ultimoTiempo = ahora;
       }
       break;
@@ -151,19 +168,10 @@ void leerBotones() {
         if (pulsadoCen) { botonMinijuegoCen(); ultimoTiempo = ahora; }
         if (pulsadoDer) { botonMinijuegoDer(); ultimoTiempo = ahora; }
       } else {
-        // Minijuego terminado, DER vuelve al menú
         if (pulsadoDer) {
-          juego.pantallaActual = PANTALLA_MENU;
+          juego.pantallaActual = PANTALLA_MASCOTA;
           ultimoTiempo = ahora;
         }
-      }
-      break;
-
-    case PANTALLA_MUERTE:
-      // Cualquier botón reinicia
-      if (pulsadoCen) {
-        juego.pantallaActual = PANTALLA_ANIMACION_HUEVO;
-        ultimoTiempo = ahora;
       }
       break;
   }

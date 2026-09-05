@@ -74,6 +74,12 @@
 #define PANTALLA_MUERTE           12 // pantalla de muerte
 #define PANTALLA_EVOLUCION        13 // animación de evolución
 
+// Zumbador
+#define PIN_BUZZER  32
+
+// Reinicio en pantalla de muerte
+#define SEGUNDOS_REINICIO  10
+
 // ============================================================
 // ESTADO DEL JUEGO
 // ============================================================

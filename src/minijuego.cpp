@@ -1,4 +1,16 @@
 #include "minijuego.h"
+#include "sprites/sprites.h"
+
+static void dibujarSpriteMin(const uint16_t* sprite, int x, int y, int w, int h) {
+  for (int j = 0; j < h; j++) {
+    for (int i = 0; i < w; i++) {
+      uint16_t pixel = pgm_read_word(&sprite[j * w + i]);
+      if (pixel != 0xFFFF) {
+        tft.drawPixel(x + i, y + j, pixel);
+      }
+    }
+  }
+}
 
 // ============================================================
 // CONSTANTES DEL MINIJUEGO
@@ -56,20 +68,10 @@ static void dibujarObjeto(Objeto& obj) {
   int x = X_CARRILES[obj.carril] - 8;
 
   switch (obj.tipo) {
-    case OBJ_CHAMPINON: tft.setTextColor(COLOR_BLANCO);  break;
-    case OBJ_PEPERONI:  tft.setTextColor(COLOR_ROJO);    break;
-    case OBJ_BACON:     tft.setTextColor(COLOR_NARANJA); break;
-    case OBJ_RATA:      tft.setTextColor(COLOR_GRIS);    break;
-  }
-
-  tft.setTextSize(1);
-  tft.setCursor(x, obj.y);
-
-  switch (obj.tipo) {
-    case OBJ_CHAMPINON: tft.print("[C]"); break;
-    case OBJ_PEPERONI:  tft.print("[P]"); break;
-    case OBJ_BACON:     tft.print("[B]"); break;
-    case OBJ_RATA:      tft.print("[R]"); break;
+    case OBJ_CHAMPINON: dibujarSpriteMin(Icon_Mushroom, x, obj.y, 16, 16); break;
+    case OBJ_PEPERONI:  dibujarSpriteMin(Icon_Onion,    x, obj.y, 16, 16); break;
+    case OBJ_BACON:     dibujarSpriteMin(Icon_Bacon,    x, obj.y, 16, 16); break;
+    case OBJ_RATA:      dibujarSpriteMin(Icon_Rat,      x, obj.y, 16, 16); break;
   }
 }
 
@@ -111,14 +113,9 @@ static void spawnearObjeto() {
 // DIBUJAR MASCOTA
 // ============================================================
 static void dibujarMascotaJuego() {
-  // Borrar la fila de la mascota entera primero
   tft.fillRect(0, Y_MASCOTA, 160, 16, COLOR_NEGRO);
-
-  tft.setTextColor(COLOR_AMARILLO);
-  tft.setTextSize(1);
   int x = X_CARRILES[carrilMascota] - 8;
-  tft.setCursor(x, Y_MASCOTA);
-  tft.print("[M]"); // placeholder hasta tener sprite
+  dibujarSpriteMin(Icon_Pizza, x, Y_MASCOTA, 16, 16);
 }
 
 // ============================================================

@@ -5,6 +5,14 @@
 #include "Rider_Frame0.h"
 #include "Rider_Frame1.h"
 
+// --- Fase huevo decoración ---
+#include "Deco_Bush.h"
+#include "Deco_Line.h"
+
+// --- Pantalla de muerte ---
+#include "Ghost_Frame0.h"
+#include "Ghost_Frame1.h"
+
 // --- Mascotas ---
 #include "Baby_Idle0.h"
 #include "Baby_Idle1.h"

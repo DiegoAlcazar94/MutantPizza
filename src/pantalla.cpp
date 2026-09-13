@@ -186,10 +186,8 @@ static void dibujarHuevo() {
     }
   }
 
-  // Mover setos de derecha a izquierda
-  // Borramos la posición anterior antes de mover
-  tft.fillRect(xBush1, 60, 16, 16, 0xFFFF); // borra seto 1
-  tft.fillRect(xBush2, 60, 16, 16, 0xFFFF); // borra seto 2
+  dibujarSprite(Deco_Bush, xBush1, 60, 16, 16);
+  dibujarSprite(Deco_Bush, xBush2, 60, 16, 16);
 
   xBush1 -= 4;
   xBush2 -= 4;
@@ -410,17 +408,18 @@ static void dibujarMuerte() {
 
   // Fantasmita — PLACEHOLDER hasta tener Ghost_Frame0/1
   // Sustituye el fillRect por dibujarSprite(Ghost_Frame0/1, ...)
-  tft.fillRect(20, 30, 16, 16, COLOR_BLANCO);
-  // dibujarSprite(frameActual == 0 ? Ghost_Frame0 : Ghost_Frame1, 20, 30, 16, 16);
+  dibujarSprite(frameActual == 0 ? Ghost_Frame0 : Ghost_Frame1, 20, 20, 32, 42);
 
   // Texto de muerte
   tft.setTextColor(COLOR_ROJO);
   tft.setTextSize(1);
-  tft.setCursor(45, 30);
-  tft.print("DESCANSA EN PAZ");
+  tft.setCursor(58, 25);
+  tft.print("DESCANSA");
+  tft.setCursor(58, 37);
+  tft.print("EN PAZ");
   tft.setTextColor(COLOR_GRIS);
-  tft.setCursor(45, 45);
-  tft.print("Murio el ");
+  tft.setCursor(58, 52);
+  tft.print("Murio: ");
   if (juego.hora < 10) tft.print("0");
   tft.print(juego.hora);
   tft.print(":");

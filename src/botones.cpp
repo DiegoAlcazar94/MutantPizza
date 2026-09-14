@@ -72,15 +72,19 @@ void leerBotones() {
     case PANTALLA_SETEAR_HORA:
       if (pulsadoIzq) {
         juego.hora = (juego.hora + 1) % 24;
+        sonarNavegacion(); 
         ultimoTiempo = ahora;
       }
       if (pulsadoCen) {
         juego.minutos = (juego.minutos + 1) % 60;
+        sonarNavegacion();
         ultimoTiempo = ahora;
       }
       if (pulsadoDer) {
-        juego.horaConfigurada = true;
-        juego.pantallaActual  = PANTALLA_ANIMACION_HUEVO;
+        juego.horaConfigurada      = true;
+        juego.minutosEnFaseActual  = 0; 
+        juego.pantallaActual       = PANTALLA_ANIMACION_HUEVO;
+        sonarAccion();    
         ultimoTiempo = ahora;
       }
       break;

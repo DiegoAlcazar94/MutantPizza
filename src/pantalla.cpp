@@ -180,11 +180,7 @@ static int xBush2 = 100;
 
 static void dibujarHuevo() {
   // Fondo completo
-  for (int ty = 0; ty < 128; ty += 32) {
-    for (int tx = 0; tx < 160; tx += 32) {
-      tft.drawRGBBitmap(tx, ty, Background, 32, 32);
-    }
-  }
+  tft.fillScreen(COLOR_NEGRO);
 
   dibujarSprite(Deco_Bush, xBush1, 60, 16, 16);
   dibujarSprite(Deco_Bush, xBush2, 60, 16, 16);
@@ -194,14 +190,6 @@ static void dibujarHuevo() {
 
   if (xBush1 < -16) xBush1 = 160;
   if (xBush2 < -16) xBush2 = 160;
-
-  // Dibujar setos en nueva posición
-  // PLACEHOLDER: rectángulo verde hasta tener el sprite Deco_Bush
-  tft.fillRect(xBush1, 60, 16, 16, COLOR_VERDE);
-  tft.fillRect(xBush2, 60, 16, 16, COLOR_VERDE);
-  // Cuando tengas Deco_Bush listo sustituye las dos líneas anteriores por:
-  // dibujarSprite(Deco_Bush, xBush1, 60, 16, 16);
-  // dibujarSprite(Deco_Bush, xBush2, 60, 16, 16);
 
   // Rider fijo en el centro, encima de los setos
   int xRider = 48;

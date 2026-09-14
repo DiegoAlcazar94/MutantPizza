@@ -17,11 +17,7 @@ static void dibujarSprite(const uint16_t* sprite, int x, int y, int w, int h) {
 }
 
 static void dibujarFondo() {
-  for (int ty = 21; ty < 108; ty += 32) {
-    for (int tx = 0; tx < 160; tx += 32) {
-      tft.drawRGBBitmap(tx, ty, Background, 32, 32);
-    }
-  }
+  tft.drawRGBBitmap(0, 0, Background, 160, 128);
 }
 
 static void obtenerSprite(const uint16_t** sprite, int* tamano) {

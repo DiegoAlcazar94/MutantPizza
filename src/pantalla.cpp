@@ -4,6 +4,16 @@
 #include "sonidos.h"
 
 static uint8_t frameActual = 0;
+static int posX = 64; 
+static int dirX = 2;
+static bool necesidadRedibujarFondo = true;
+
+#define COLOR_FONDO_HUEVO 0xE734
+
+// Fuerza a que en el próximo frame se repinte el fondo y los iconos
+void forzarRedibujadoPantalla() {
+  necesidadRedibujarFondo = true;
+}
 
 static void dibujarSprite(const uint16_t* sprite, int x, int y, int w, int h) {
   for (int j = 0; j < h; j++) {
@@ -74,9 +84,7 @@ static void dibujarIconos() {
     int x = i * 40 + 12;
     int y = 2;
     if (juego.iconoSeleccionado == i) {
-      tft.fillRect(i * 40, 0, 39, 20, COLOR_NARANJA);
-    } else {
-      tft.fillRect(i * 40, 0, 39, 20, COLOR_GRIS);
+      tft.drawRect(i * 40 + 2, 0, 36, 20, COLOR_NARANJA);
     }
     dibujarSprite(iconosArr[i], x, y, 16, 16);
   }
@@ -93,48 +101,52 @@ static void dibujarIconos() {
     int y = 110;
 
     if (i == 3) {
-      bool hayProblema = juego.enferma ||
-                         juego.sucia   ||
-                         juego.desobediencia >= 4 ||
-                         juego.temperatura == 0   ||
-                         juego.felicidad == 0;
-      tft.fillRect(i * 40, 108, 39, 20, COLOR_GRIS);
+      bool hayProblema = juego.enferma || juego.sucia || 
+                         juego.desobediencia >= 4 || juego.temperatura == 0 || juego.felicidad == 0;
       if (hayProblema) dibujarSprite(Icon_Alarm, x, y, 16, 16);
       continue;
     }
 
     if (juego.iconoSeleccionado == i + 4) {
-      tft.fillRect(i * 40, 108, 39, 20, COLOR_NARANJA);
-    } else {
-      tft.fillRect(i * 40, 108, 39, 20, COLOR_GRIS);
+      tft.drawRect(i * 40 + 2, 108, 36, 20, COLOR_NARANJA);
     }
     dibujarSprite(iconosAbj[i], x, y, 16, 16);
   }
-
-  tft.drawLine(0, 20,  160, 20,  COLOR_GRIS);
-  tft.drawLine(0, 107, 160, 107, COLOR_GRIS);
 }
 
 static void dibujarMascota() {
-  dibujarFondo();
-
   const uint16_t* spriteActual = nullptr;
   int tamano = 32;
   obtenerSprite(&spriteActual, &tamano);
 
-  int x = (160 - tamano) / 2;
-  int y = 21 + (86 - tamano) / 2;
-  dibujarSprite(spriteActual, x, y, tamano, tamano);
+  int y = 20 + (88 - tamano) / 2;
 
-  tft.setTextSize(1);
-  tft.setTextColor(COLOR_NEGRO);
-  tft.setCursor(108, 24);
-  if (juego.hora < 10) tft.print("0");
-  tft.print(juego.hora);
-  tft.print(":");
-  if (juego.minutos < 10) tft.print("0");
-  tft.print(juego.minutos);
+  // 1. DIBUJADO DE ESTRUCTURA FIJA (solo si venimos de otra pantalla o se selecciona icono)
+  if (necesidadRedibujarFondo) {
+    dibujarFondo();
+    dibujarIconos();
+    necesidadRedibujarFondo = false;
+  } else {
+    // 2. REPARAR SOLO EL ÁREA DONDE ESTABA LA MASCOTA EN EL FRAME ANTERIOR
+    // Redibuja solo el trozo del mapa de bits del fondo recortado a esa casilla
+    tft.drawRGBBitmap(posX - 4, y - 2, Background + (y - 2) * 160 + (posX - 4), tamano + 8, tamano + 4);
+  }
 
+  // 3. MOVER MASCOTA
+  posX += dirX;
+
+  if (posX <= 2) {
+    posX = 2;
+    dirX = -dirX;
+  } else if (posX >= (160 - tamano - 2)) {
+    posX = 160 - tamano - 2;
+    dirX = -dirX;
+  }
+
+  // 4. DIBUJAR MASCOTA EN LA NUEVA POSICIÓN
+  dibujarSprite(spriteActual, posX, y, tamano, tamano);
+
+  // 5. INDICADORES DE ESTADO (Temperatura, Dormir, Sucia, Enferma)
   if (juego.temperatura <= 2) {
     tft.setTextColor(COLOR_AZUL);
     tft.setTextSize(2);
@@ -145,7 +157,8 @@ static void dibujarMascota() {
   if (juego.durmiendo && juego.luzApagada) {
     tft.setTextColor(COLOR_NEGRO);
     tft.setTextSize(1);
-    tft.setCursor(x + tamano + 2, y);
+    int xText = (posX + tamano + 10 < 150) ? (posX + tamano + 2) : (posX - 20);
+    tft.setCursor(xText, y);
     tft.print(frameActual == 0 ? "z" : "z z");
   }
 
@@ -161,44 +174,33 @@ static void dibujarMascota() {
     tft.setCursor(100, 95);
     tft.print("+ enferma");
   }
-
-  dibujarIconos();
 }
 
-//fase huevo
-
-// Definición del color en la cabecera del archivo
-#define COLOR_FONDO_HUEVO 0xE734
-
+// FASE HUEVO
 static int xBush1 = 20;
 static int xBush2 = 100;
 
 static void dibujarHuevo() {
-  // 1. Fondo plano gris verdoso usando la definición
   tft.fillRect(0, 0, 160, 128, COLOR_FONDO_HUEVO);
 
-  // 2. Mover setos de Derecha a Izquierda
   xBush1 -= 4;
   xBush2 -= 4;
 
   if (xBush1 > 160) xBush1 = -16;
   if (xBush2 > 160) xBush2 = -16;
 
-  // Dibujar los dos setos
   dibujarSprite(Deco_Bush, xBush1, 60, 16, 16);
   dibujarSprite(Deco_Bush, xBush2, 60, 16, 16);
 
-  // 3. Rider animado en el centro
   int xRider = 48;
-  int yRider = 50;
+  int yRider = 30;
 
   if (frameActual == 0) {
-    dibujarSprite(Rider_Frame0, xRider, yRider, 64, 32);
+    dibujarSprite(Rider_Frame0, xRider, yRider, 64, 64);
   } else {
-    dibujarSprite(Rider_Frame1, xRider, yRider, 64, 32);
+    dibujarSprite(Rider_Frame1, xRider, yRider, 64, 64);
   }
 
-  // 4. Mensaje indicativo si no se ha fijado la hora
   if (!juego.horaConfigurada) {
     tft.setTextColor(COLOR_NEGRO);
     tft.setTextSize(1);
@@ -206,6 +208,7 @@ static void dibujarHuevo() {
     tft.print("CENTRO: poner hora");
   }
 }
+
 static void dibujarSetearHora() {
   tft.fillScreen(COLOR_NEGRO);
   tft.setTextColor(COLOR_AMARILLO);
@@ -250,6 +253,7 @@ static void dibujarComer() {
   juego.temperatura    = 5;
   juego.diasSinCalor   = 0;
   juego.pantallaActual = PANTALLA_MASCOTA;
+  forzarRedibujadoPantalla();
   tft.fillScreen(COLOR_NEGRO);
 }
 
@@ -380,22 +384,15 @@ static void dibujarEstadoAlterado() {
   tft.print("DER: volver");
 }
 
-// ============================================================
-// PANTALLA DE MUERTE — Fondo blanco
-// ============================================================
 static void dibujarMuerte() {
   if (!juego.sonidoMuerteReproducido) {
     sonarMuerte();
     juego.sonidoMuerteReproducido = true;
   }
 
-  // Fondo blanco para pantalla de muerte
   tft.fillScreen(COLOR_BLANCO);
-
-  // Fantasmita
   dibujarSprite(frameActual == 0 ? Ghost_Frame0 : Ghost_Frame1, 20, 20, 32, 42);
 
-  // Texto de muerte (letras rojas y negras para contraste en blanco)
   tft.setTextColor(COLOR_ROJO);
   tft.setTextSize(1);
   tft.setCursor(58, 25);
@@ -412,7 +409,6 @@ static void dibujarMuerte() {
   if (juego.minutos < 10) tft.print("0");
   tft.print(juego.minutos);
 
-  // Barra de progreso del reinicio
   if (juego.botonesLateralesMuerte && juego.tiempoBotonMuerte > 0) {
     unsigned long transcurrido = millis() - juego.tiempoBotonMuerte;
     int progreso = map(transcurrido, 0, SEGUNDOS_REINICIO * 1000, 0, 100);
@@ -426,13 +422,10 @@ static void dibujarMuerte() {
   tft.setCursor(5, 105);
   tft.print("[manten laterales 10s]");
 }
-// ============================================================
-// PANTALLA DE EVOLUCIÓN — parpadeo + sprite grande que encoge
-// ============================================================
+
 static void dibujarEvolucion() {
   sonarEvolucion();
 
-  // Parpadeo 3 veces
   for (int p = 0; p < 3; p++) {
     tft.fillScreen(COLOR_NEGRO);
     delay(150);
@@ -451,27 +444,18 @@ static void dibujarEvolucion() {
   tft.print("Fase ");
   tft.print(juego.fase);
 
-  // Obtener sprite de la nueva fase
   const uint16_t* spriteNuevo = nullptr;
   int tamanoFinal = 32;
   obtenerSprite(&spriteNuevo, &tamanoFinal);
 
-  // Animación: aparece grande y encoge hasta tamaño real
-  // Dibujamos en 3 pasos usando drawRGBBitmap con escalado
-  // Como ST7735 no escala, simulamos con rectángulos de relleno
   for (int tam = tamanoFinal * 2; tam >= tamanoFinal; tam -= tamanoFinal / 2) {
     tft.fillRect(0, 45, 160, 80, COLOR_NEGRO);
     int xi = (160 - tam) / 2;
     int yi = 45 + (80 - tam) / 2;
-    // Placeholder: rectángulo del tamaño del sprite
     tft.drawRect(xi, yi, tam, tam, COLOR_AMARILLO);
-    // Cuando quieras sustituir por el sprite real descomenta esto
-    // y comenta el drawRect de arriba:
-    // dibujarSprite(spriteNuevo, xi, yi, tamanoFinal, tamanoFinal);
     delay(300);
   }
 
-  // Frame final: sprite real centrado
   tft.fillRect(0, 45, 160, 80, COLOR_NEGRO);
   int xf = (160 - tamanoFinal) / 2;
   int yf = 45 + (80 - tamanoFinal) / 2;
@@ -479,12 +463,10 @@ static void dibujarEvolucion() {
   delay(1500);
 
   juego.pantallaActual = PANTALLA_MASCOTA;
+  forzarRedibujadoPantalla();
   tft.fillScreen(COLOR_NEGRO);
 }
 
-// ============================================================
-// FUNCIÓN PRINCIPAL
-// ============================================================
 void actualizarPantalla() {
   frameActual = !frameActual;
 

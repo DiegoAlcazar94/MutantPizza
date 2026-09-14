@@ -3,6 +3,7 @@
 #include "sonidos.h"
 #include "juego.h"
 #include "fases.h"
+#include "pantalla.h"
 
 static int ultimoIzq = HIGH;
 static int ultimoCen = HIGH;
@@ -81,7 +82,7 @@ void leerBotones() {
         ultimoTiempo = ahora;
       }
       if (pulsadoDer) {
-        juego.horaConfigurada      = true;
+        juego.horaConfigurada       = true;
         juego.minutosEnFaseActual  = 0; 
         juego.pantallaActual       = PANTALLA_ANIMACION_HUEVO;
         sonarAccion();    
@@ -92,6 +93,7 @@ void leerBotones() {
     case PANTALLA_MASCOTA:
       if (pulsadoIzq) {
         juego.iconoSeleccionado = (juego.iconoSeleccionado + 1) % 7;
+        forzarRedibujadoPantalla(); // <-- LLAMADO DESPUÉS DE CAMBIAR EL ICONO
         sonarNavegacion();
         ultimoTiempo = ahora;
       }
@@ -99,6 +101,7 @@ void leerBotones() {
         sonarAccion();
         if (juego.iconoSeleccionado == 1) {
           juego.luzApagada = !juego.luzApagada;
+          forzarRedibujadoPantalla();
         } else {
           uint8_t destinos[] = {
             PANTALLA_COMER, PANTALLA_LUZ, PANTALLA_JUGAR, PANTALLA_CURAR,
@@ -113,6 +116,7 @@ void leerBotones() {
     case PANTALLA_LUZ:
       if (pulsadoDer) {
         juego.pantallaActual = PANTALLA_MASCOTA;
+        forzarRedibujadoPantalla();
         ultimoTiempo = ahora;
       }
       break;
@@ -128,6 +132,7 @@ void leerBotones() {
       }
       if (pulsadoDer) {
         juego.pantallaActual = PANTALLA_MASCOTA;
+        forzarRedibujadoPantalla();
         ultimoTiempo = ahora;
       }
       break;
@@ -143,6 +148,7 @@ void leerBotones() {
       }
       if (pulsadoDer) {
         juego.pantallaActual = PANTALLA_MASCOTA;
+        forzarRedibujadoPantalla();
         ultimoTiempo = ahora;
       }
       break;
@@ -154,6 +160,7 @@ void leerBotones() {
       }
       if (pulsadoDer) {
         juego.pantallaActual = PANTALLA_MASCOTA;
+        forzarRedibujadoPantalla();
         ultimoTiempo = ahora;
       }
       break;
@@ -162,6 +169,7 @@ void leerBotones() {
     case PANTALLA_ESTADO_ALTERADO:
       if (pulsadoDer) {
         juego.pantallaActual = PANTALLA_MASCOTA;
+        forzarRedibujadoPantalla();
         ultimoTiempo = ahora;
       }
       break;
@@ -174,6 +182,7 @@ void leerBotones() {
       } else {
         if (pulsadoDer) {
           juego.pantallaActual = PANTALLA_MASCOTA;
+          forzarRedibujadoPantalla();
           ultimoTiempo = ahora;
         }
       }

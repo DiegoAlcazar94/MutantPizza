@@ -384,7 +384,7 @@ static void dibujarEstadoAlterado() {
 }
 
 // ============================================================
-// PANTALLA DE MUERTE — fantasmita + fecha + reinicio 10s
+// PANTALLA DE MUERTE — Fondo blanco
 // ============================================================
 static void dibujarMuerte() {
   if (!juego.sonidoMuerteReproducido) {
@@ -392,20 +392,21 @@ static void dibujarMuerte() {
     juego.sonidoMuerteReproducido = true;
   }
 
-  tft.fillScreen(COLOR_NEGRO);
+  // Fondo blanco para pantalla de muerte
+  tft.fillScreen(COLOR_BLANCO);
 
-  // Fantasmita — PLACEHOLDER hasta tener Ghost_Frame0/1
-  // Sustituye el fillRect por dibujarSprite(Ghost_Frame0/1, ...)
+  // Fantasmita
   dibujarSprite(frameActual == 0 ? Ghost_Frame0 : Ghost_Frame1, 20, 20, 32, 42);
 
-  // Texto de muerte
+  // Texto de muerte (letras rojas y negras para contraste en blanco)
   tft.setTextColor(COLOR_ROJO);
   tft.setTextSize(1);
   tft.setCursor(58, 25);
   tft.print("DESCANSA");
   tft.setCursor(58, 37);
   tft.print("EN PAZ");
-  tft.setTextColor(COLOR_GRIS);
+  
+  tft.setTextColor(COLOR_NEGRO);
   tft.setCursor(58, 52);
   tft.print("Murio: ");
   if (juego.hora < 10) tft.print("0");
@@ -420,15 +421,14 @@ static void dibujarMuerte() {
     int progreso = map(transcurrido, 0, SEGUNDOS_REINICIO * 1000, 0, 100);
     progreso = constrain(progreso, 0, 100);
     tft.fillRect(14, 90, progreso, 6, COLOR_ROJO);
-    tft.drawRect(14, 90, 100, 6, COLOR_GRIS);
+    tft.drawRect(14, 90, 100, 6, COLOR_NEGRO);
   }
 
-  tft.setTextColor(COLOR_GRIS);
+  tft.setTextColor(COLOR_NEGRO);
   tft.setTextSize(1);
   tft.setCursor(5, 105);
   tft.print("[manten laterales 10s]");
 }
-
 // ============================================================
 // PANTALLA DE EVOLUCIÓN — parpadeo + sprite grande que encoge
 // ============================================================

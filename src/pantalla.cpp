@@ -169,32 +169,30 @@ static void dibujarMascota() {
   dibujarIconos();
 }
 
-// ============================================================
-// HUEVO — rider con setos pasando por detrás
-// xBush1 y xBush2 son las posiciones X de los dos setos
-// Se actualizan cada frame para dar sensación de movimiento
-// Cuando llegan al borde izquierdo vuelven a aparecer a la derecha
-// ============================================================
+//fase huevo
+
 static int xBush1 = 20;
 static int xBush2 = 100;
 
 static void dibujarHuevo() {
-  // Fondo completo
-  tft.fillScreen(COLOR_NEGRO);
+  // Borra únicamente la franja horizontal donde se desplazan los arbustos
+  tft.fillRect(0, 60, 160, 16, COLOR_NEGRO);
 
+  // Dibujar setos
   dibujarSprite(Deco_Bush, xBush1, 60, 16, 16);
   dibujarSprite(Deco_Bush, xBush2, 60, 16, 16);
 
+  // Mover setos hacia la izquierda
   xBush1 -= 4;
   xBush2 -= 4;
 
   if (xBush1 < -16) xBush1 = 160;
   if (xBush2 < -16) xBush2 = 160;
 
-  // Rider fijo en el centro, encima de los setos
+  // Rider fijo en el centro
   int xRider = 48;
   int yRider = 50;
-  // Alterna frame para simular movimiento de ruedas
+
   if (frameActual == 0) {
     dibujarSprite(Rider_Frame0, xRider, yRider, 64, 32);
   } else {
@@ -202,13 +200,12 @@ static void dibujarHuevo() {
   }
 
   if (!juego.horaConfigurada) {
-    tft.setTextColor(COLOR_NEGRO);
+    tft.setTextColor(COLOR_BLANCO);
     tft.setTextSize(1);
     tft.setCursor(15, 105);
     tft.print("CENTRO: poner hora");
   }
 }
-
 static void dibujarSetearHora() {
   tft.fillScreen(COLOR_NEGRO);
   tft.setTextColor(COLOR_AMARILLO);

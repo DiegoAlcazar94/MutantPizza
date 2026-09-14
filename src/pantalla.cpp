@@ -76,7 +76,7 @@ static void dibujarIconos() {
     if (juego.iconoSeleccionado == i) {
       tft.fillRect(i * 40, 0, 39, 20, COLOR_NARANJA);
     } else {
-      tft.fillRect(i * 40, 0, 39, 20, COLOR_NEGRO);
+      tft.fillRect(i * 40, 0, 39, 20, COLOR_GRIS);
     }
     dibujarSprite(iconosArr[i], x, y, 16, 16);
   }
@@ -98,7 +98,7 @@ static void dibujarIconos() {
                          juego.desobediencia >= 4 ||
                          juego.temperatura == 0   ||
                          juego.felicidad == 0;
-      tft.fillRect(i * 40, 108, 39, 20, COLOR_NEGRO);
+      tft.fillRect(i * 40, 108, 39, 20, COLOR_GRIS);
       if (hayProblema) dibujarSprite(Icon_Alarm, x, y, 16, 16);
       continue;
     }
@@ -106,7 +106,7 @@ static void dibujarIconos() {
     if (juego.iconoSeleccionado == i + 4) {
       tft.fillRect(i * 40, 108, 39, 20, COLOR_NARANJA);
     } else {
-      tft.fillRect(i * 40, 108, 39, 20, COLOR_NEGRO);
+      tft.fillRect(i * 40, 108, 39, 20, COLOR_GRIS);
     }
     dibujarSprite(iconosAbj[i], x, y, 16, 16);
   }

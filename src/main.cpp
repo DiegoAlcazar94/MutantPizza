@@ -53,9 +53,6 @@ void loop() {
     tickJuego();
   }
 
-  // Actualizar animaciones cada 500ms
-  if (ahora - ultimoFrame >= 500) {
-    ultimoFrame = ahora;
-    actualizarPantalla();
-  }
+  // Borra solo la estela que deja el seto al moverse
+tft.fillRect(xBush1 + 16, 60, 4, 16, COLOR_NEGRO);
 }

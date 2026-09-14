@@ -181,9 +181,9 @@ static void dibujarHuevo() {
   // 1. Fondo plano gris verdoso usando la definición
   tft.fillRect(0, 0, 160, 128, COLOR_FONDO_HUEVO);
 
-  // 2. Mover setos de IZQUIERDA a DERECHA
-  xBush1 += 4;
-  xBush2 += 4;
+  // 2. Mover setos de Derecha a Izquierda
+  xBush1 -= 4;
+  xBush2 -= 4;
 
   if (xBush1 > 160) xBush1 = -16;
   if (xBush2 > 160) xBush2 = -16;

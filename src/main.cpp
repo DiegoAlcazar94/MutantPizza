@@ -8,18 +8,15 @@
 #include "fases.h"
 #include "sonidos.h"
 
-// ============================================================
-// AQUÍ se define la variable global del juego
-// (en juego.h solo se declara con extern)
-// ============================================================
+// Variable global del juego
 EstadoJuego juego;
 
-// Pantalla — también global para que todos los archivos la usen
+// Configuración de la pantalla TFT
 Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
 
 // Temporizadores
-unsigned long ultimoTick    = 0;
-unsigned long ultimoFrame   = 0; // para animaciones (cada 500ms)
+unsigned long ultimoTick  = 0;
+unsigned long ultimoFrame = 0; // Animaciones cada 500 ms
 
 void setup() {
   Serial.begin(115200);
@@ -29,13 +26,9 @@ void setup() {
   tft.setRotation(1);
   tft.fillScreen(COLOR_NEGRO);
 
-  // Iniciar botones
+  // Iniciar periféricos y estado
   iniciarBotones();
-
-  // Iniciar sonido
   iniciarSonido();
-
-  // Iniciar estado del juego
   iniciarJuego();
 
   Serial.println("--- MutantPizza Tamagotchi ---");
@@ -44,15 +37,18 @@ void setup() {
 void loop() {
   unsigned long ahora = millis();
 
-  // Leer botones (siempre, en cada frame)
+  // 1. Leer entradas de los botones
   leerBotones();
 
-  // Tick del juego cada minuto
+  // 2. Paso del tiempo del juego (cada minuto)
   if (ahora - ultimoTick >= MS_TICK) {
     ultimoTick = ahora;
     tickJuego();
   }
 
-  // Borra solo la estela que deja el seto al moverse
-tft.fillRect(xBush1 + 16, 60, 4, 16, COLOR_NEGRO);
+  // 3. Refresco de pantalla y animaciones (cada 500 ms)
+  if (ahora - ultimoFrame >= 500) {
+    ultimoFrame = ahora;
+    actualizarPantalla();
+  }
 }

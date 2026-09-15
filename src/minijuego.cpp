@@ -19,8 +19,8 @@ static void dibujarSpriteMin(const uint16_t* sprite, int x, int y, int w, int h)
 // CONSTANTES DEL MINIJUEGO
 // ============================================================
 #define NUM_CARRILES     3
-#define MAX_OBJETOS      4    // máximo de objetos en pantalla a la vez
-#define VELOCIDAD_INICIO 4    // píxeles que baja cada frame
+#define MAX_OBJETOS      8    // máximo de objetos en pantalla a la vez
+#define VELOCIDAD_INICIO 12    // píxeles que baja cada frame
 #define VIDAS_INICIO     3
 #define COMIDA_PARA_GANAR 20
 
@@ -58,7 +58,7 @@ static uint8_t spawnsHastaAhora;
 bool    minijuegoActivo;
 static bool    minijuegoGanado;
 
-#define FRAMES_ENTRE_SPAWNS 25
+#define FRAMES_ENTRE_SPAWNS 5
 
 // Redibuja las líneas divisorias en la zona del objeto para no romper la pantalla
 static void redibujarLineasEnArea(int y, int h) {

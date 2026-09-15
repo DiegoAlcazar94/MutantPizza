@@ -32,6 +32,14 @@ void setup() {
   iniciarJuego();
 
   Serial.println("--- MutantPizza Tamagotchi ---");
+  // prueba 2
+    pinMode(32, OUTPUT);
+  for (int i = 0; i < 500; i++) {
+    digitalWrite(32, HIGH);
+    delayMicroseconds(500); // 1 kHz
+    digitalWrite(32, LOW);
+    delayMicroseconds(500);
+  }
 }
 
 void loop() {

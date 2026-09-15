@@ -165,7 +165,9 @@ static void pantallaFinMinijuego() {
     tft.setCursor(10, 65);
     tft.print("Felicidad +1");
 
-    if (juego.felicidad < 5) juego.felicidad++;
+    if (juego.felicidad < 5) {
+      juego.felicidad++;
+    }
 
   } else {
     tft.setTextColor(COLOR_ROJO);
@@ -176,15 +178,17 @@ static void pantallaFinMinijuego() {
     tft.setTextColor(COLOR_NEGRO);
     tft.setCursor(10, 65);
 
-    int bajada = max(1, (int)(juego.felicidad * 0.1));
-    juego.felicidad = (uint8_t)max(0, juego.felicidad - bajada);
-    tft.print("Felicidad -10%");
+    if (juego.felicidad > 0) {
+      juego.felicidad--;
+    }
+    tft.print("Felicidad -1");
   }
 
   tft.setTextColor(COLOR_NEGRO);
   tft.setCursor(10, 100);
   tft.print("DER: volver al menu");
 
+  // DESACTIVAMOS EL MINIJUEGO PARA NO VOLVER A ENTRAR A ESTA FUNCIÓN
   minijuegoActivo = false;
 }
 
@@ -222,19 +226,17 @@ void iniciarMinijuego() {
 // ACTUALIZAR MINIJUEGO
 // ============================================================
 void actualizarMinijuego() {
+  // SI YA TERMINÓ, NO HACER NADA (Evita modificar la felicidad en bucle)
   if (!minijuegoActivo) return;
 
   for (int i = 0; i < MAX_OBJETOS; i++) {
     if (!objetos[i].activo) continue;
 
     borrarObjeto(objetos[i]);
-
     objetos[i].y += velocidad;
 
     if (objetos[i].y >= Y_MASCOTA - 4) {
-
       if (objetos[i].carril == carrilMascota) {
-
         if (objetos[i].tipo == OBJ_RATA) {
           vidas--;
           tft.fillRect(0, 0, 160, 12, COLOR_NEGRO);
@@ -247,7 +249,7 @@ void actualizarMinijuego() {
           if (vidas == 0) {
             minijuegoGanado = false;
             pantallaFinMinijuego();
-            return;
+            return; // Salir inmediatamente
           }
 
         } else {
@@ -256,13 +258,12 @@ void actualizarMinijuego() {
           if (comidaRecogida >= COMIDA_PARA_GANAR) {
             minijuegoGanado = true;
             pantallaFinMinijuego();
-            return;
+            return; // Salir inmediatamente
           }
         }
       }
 
       objetos[i].activo = false;
-
     } else {
       dibujarObjeto(objetos[i]);
     }

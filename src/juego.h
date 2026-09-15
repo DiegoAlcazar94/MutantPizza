@@ -33,7 +33,7 @@
 // ============================================================
 // TIEMPOS
 // ============================================================
-#define MS_TICK         10000UL
+#define MS_TICK         60000UL
 #define DIAS_BEBE       5
 #define MINUTOS_NACER   15
 #define HORA_DORMIR     23

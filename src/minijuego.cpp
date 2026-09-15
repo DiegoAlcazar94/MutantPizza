@@ -1,6 +1,9 @@
 #include "minijuego.h"
 #include "sprites/sprites.h"
 
+// Color verde LCD retro estilo Tamagotchi / Game Boy (RGB565)
+#define COLOR_FONDO_LCD 0x8CA0 
+
 static void dibujarSpriteMin(const uint16_t* sprite, int x, int y, int w, int h) {
   for (int j = 0; j < h; j++) {
     for (int i = 0; i < w; i++) {
@@ -22,12 +25,11 @@ static void dibujarSpriteMin(const uint16_t* sprite, int x, int y, int w, int h)
 #define COMIDA_PARA_GANAR 20
 
 // Posiciones X del centro de cada carril
-// Pantalla 160px / 3 carriles = ~53px por carril
 const int X_CARRILES[3] = { 26, 80, 133 };
 
 // Y donde está la mascota (fila de abajo)
 #define Y_MASCOTA  105
-#define Y_INICIO   -16  // donde aparecen los objetos (fuera de pantalla arriba)
+#define Y_INICIO   -16  // donde aparecen los objetos
 
 // Tipos de objeto
 #define OBJ_VACIO      0
@@ -51,16 +53,22 @@ static uint8_t carrilMascota;   // 0, 1 o 2
 static uint8_t vidas;
 static uint8_t comidaRecogida;
 static uint8_t velocidad;
-static uint8_t framesSinSpawn; // contador para saber cuándo spawnear
+static uint8_t framesSinSpawn;
 static uint8_t spawnsHastaAhora;
 bool    minijuegoActivo;
 static bool    minijuegoGanado;
 
-// Cuántos frames esperamos entre spawns (empieza en 30, baja con velocidad)
 #define FRAMES_ENTRE_SPAWNS 25
 
+// Redibuja las líneas divisorias en la zona del objeto para no romper la pantalla
+static void redibujarLineasEnArea(int y, int h) {
+  if (y < 12) return;
+  tft.drawLine(53,  y, 53,  min(y + h, (int)Y_MASCOTA), COLOR_NEGRO);
+  tft.drawLine(106, y, 106, min(y + h, (int)Y_MASCOTA), COLOR_NEGRO);
+}
+
 // ============================================================
-// DIBUJAR OBJETO en pantalla (placeholder de texto hasta tener sprites)
+// DIBUJAR OBJETO en pantalla
 // ============================================================
 static void dibujarObjeto(Objeto& obj) {
   if (!obj.activo) return;
@@ -76,27 +84,29 @@ static void dibujarObjeto(Objeto& obj) {
 }
 
 // ============================================================
-// BORRAR OBJETO de pantalla (pinta negro encima)
+// BORRAR OBJETO de pantalla (pinta el color de fondo LCD)
 // ============================================================
 static void borrarObjeto(Objeto& obj) {
   if (!obj.activo) return;
   int x = X_CARRILES[obj.carril] - 8;
-  tft.fillRect(x, obj.y, 18, 10, COLOR_NEGRO);
+  
+  // Limpiamos con el fondo LCD
+  tft.fillRect(x, obj.y, 16, 16, COLOR_FONDO_LCD);
+  
+  // Reparamos la línea divisoria si el borrado la pisó
+  redibujarLineasEnArea(obj.y, 16);
 }
 
 // ============================================================
-// SPAWNEAR un objeto nuevo en un carril aleatorio
+// SPAWNEAR un objeto nuevo
 // ============================================================
 static void spawnearObjeto() {
-  // Buscar un slot libre
   for (int i = 0; i < MAX_OBJETOS; i++) {
     if (!objetos[i].activo) {
       objetos[i].activo = true;
       objetos[i].y      = Y_INICIO;
       objetos[i].carril = random(0, 3);
 
-      // 25% de probabilidad de rata, 75% de comida
-      // Pero no más de 1 rata cada 5 spawns para no ser injusto
       if (random(0, 4) == 0 && spawnsHastaAhora % 5 == 0) {
         objetos[i].tipo = OBJ_RATA;
       } else {
@@ -113,7 +123,12 @@ static void spawnearObjeto() {
 // DIBUJAR MASCOTA
 // ============================================================
 static void dibujarMascotaJuego() {
-  tft.fillRect(0, Y_MASCOTA, 160, 16, COLOR_NEGRO);
+  tft.fillRect(0, Y_MASCOTA, 160, 16, COLOR_FONDO_LCD);
+  
+  // Redibujar divisiones de carril abajo
+  tft.drawLine(53,  Y_MASCOTA, 53,  128, COLOR_NEGRO);
+  tft.drawLine(106, Y_MASCOTA, 106, 128, COLOR_NEGRO);
+
   int x = X_CARRILES[carrilMascota] - 8;
   dibujarSpriteMin(Icon_Pizza, x, Y_MASCOTA, 16, 16);
 }
@@ -128,7 +143,7 @@ static void dibujarHUD() {
   tft.setCursor(2, 2);
   for (int i = 0; i < vidas; i++) tft.print("v ");
 
-  tft.setTextColor(COLOR_VERDE);
+  tft.setTextColor(COLOR_AMARILLO);
   tft.setCursor(90, 2);
   tft.print(comidaRecogida);
   tft.print("/");
@@ -139,19 +154,17 @@ static void dibujarHUD() {
 // PANTALLA DE FIN DE MINIJUEGO
 // ============================================================
 static void pantallaFinMinijuego() {
-  tft.fillScreen(COLOR_NEGRO);
+  tft.fillScreen(COLOR_FONDO_LCD);
 
   if (minijuegoGanado) {
-    tft.setTextColor(COLOR_VERDE);
+    tft.setTextColor(COLOR_NEGRO);
     tft.setTextSize(2);
     tft.setCursor(20, 30);
     tft.print("GANASTE!");
     tft.setTextSize(1);
-    tft.setTextColor(COLOR_BLANCO);
     tft.setCursor(10, 65);
     tft.print("Felicidad +1");
 
-    // Subir felicidad
     if (juego.felicidad < 5) juego.felicidad++;
 
   } else {
@@ -160,20 +173,18 @@ static void pantallaFinMinijuego() {
     tft.setCursor(20, 30);
     tft.print("PERDISTE");
     tft.setTextSize(1);
-    tft.setTextColor(COLOR_BLANCO);
+    tft.setTextColor(COLOR_NEGRO);
     tft.setCursor(10, 65);
 
-    // Bajar felicidad un 10% (redondeado, mínimo 0)
     int bajada = max(1, (int)(juego.felicidad * 0.1));
     juego.felicidad = (uint8_t)max(0, juego.felicidad - bajada);
     tft.print("Felicidad -10%");
   }
 
-  tft.setTextColor(COLOR_GRIS);
+  tft.setTextColor(COLOR_NEGRO);
   tft.setCursor(10, 100);
   tft.print("DER: volver al menu");
 
-  // El minijuego ha terminado, esperamos que el jugador pulse DER
   minijuegoActivo = false;
 }
 
@@ -181,7 +192,6 @@ static void pantallaFinMinijuego() {
 // INICIAR MINIJUEGO
 // ============================================================
 void iniciarMinijuego() {
-  // Limpiar todos los objetos
   for (int i = 0; i < MAX_OBJETOS; i++) {
     objetos[i].activo = false;
     objetos[i].y      = Y_INICIO;
@@ -189,7 +199,7 @@ void iniciarMinijuego() {
     objetos[i].tipo   = OBJ_VACIO;
   }
 
-  carrilMascota    = 1;  // empieza en el carril central
+  carrilMascota    = 1;
   vidas            = VIDAS_INICIO;
   comidaRecogida   = 0;
   velocidad        = VELOCIDAD_INICIO;
@@ -198,40 +208,34 @@ void iniciarMinijuego() {
   minijuegoActivo  = true;
   minijuegoGanado  = false;
 
-  tft.fillScreen(COLOR_NEGRO);
+  tft.fillScreen(COLOR_FONDO_LCD);
 
-  // Líneas divisorias de carriles
-  tft.drawLine(53,  12, 53,  Y_MASCOTA, COLOR_GRIS);
-  tft.drawLine(106, 12, 106, Y_MASCOTA, COLOR_GRIS);
+  // Líneas divisorias de carriles (en negro)
+  tft.drawLine(53,  12, 53,  128, COLOR_NEGRO);
+  tft.drawLine(106, 12, 106, 128, COLOR_NEGRO);
 
   dibujarHUD();
   dibujarMascotaJuego();
 }
 
 // ============================================================
-// ACTUALIZAR MINIJUEGO — se llama cada 500ms desde pantalla.cpp
+// ACTUALIZAR MINIJUEGO
 // ============================================================
 void actualizarMinijuego() {
   if (!minijuegoActivo) return;
 
-  // Mover todos los objetos hacia abajo
   for (int i = 0; i < MAX_OBJETOS; i++) {
     if (!objetos[i].activo) continue;
 
-    // Borrar posición anterior
     borrarObjeto(objetos[i]);
 
-    // Mover
     objetos[i].y += velocidad;
 
-    // ¿Ha llegado a la fila de la mascota?
     if (objetos[i].y >= Y_MASCOTA - 4) {
 
-      // ¿Está en el mismo carril que la mascota?
       if (objetos[i].carril == carrilMascota) {
 
         if (objetos[i].tipo == OBJ_RATA) {
-          // Colisión con rata — perder vida
           vidas--;
           tft.fillRect(0, 0, 160, 12, COLOR_NEGRO);
           tft.setTextColor(COLOR_ROJO);
@@ -247,7 +251,6 @@ void actualizarMinijuego() {
           }
 
         } else {
-          // Colisión con comida — recoger
           comidaRecogida++;
 
           if (comidaRecogida >= COMIDA_PARA_GANAR) {
@@ -258,22 +261,18 @@ void actualizarMinijuego() {
         }
       }
 
-      // Desactivar objeto (salió de pantalla o fue recogido)
       objetos[i].activo = false;
 
     } else {
-      // Dibujar en nueva posición
       dibujarObjeto(objetos[i]);
     }
   }
 
-  // Spawnear nuevo objeto
   framesSinSpawn++;
   if (framesSinSpawn >= FRAMES_ENTRE_SPAWNS) {
     framesSinSpawn = 0;
     spawnearObjeto();
 
-    // Aumentar velocidad muy suavemente cada 5 spawns
     if (spawnsHastaAhora % 5 == 0 && velocidad < 8) {
       velocidad++;
     }
@@ -289,8 +288,7 @@ void actualizarMinijuego() {
 void botonMinijuegoIzq() {
   if (!minijuegoActivo) return;
   if (carrilMascota > 0) {
-    // Borrar mascota en posición actual
-    tft.fillRect(0, Y_MASCOTA, 160, 16, COLOR_NEGRO);
+    tft.fillRect(0, Y_MASCOTA, 160, 16, COLOR_FONDO_LCD);
     carrilMascota--;
     dibujarMascotaJuego();
   }
@@ -298,14 +296,12 @@ void botonMinijuegoIzq() {
 
 void botonMinijuegoCen() {
   if (!minijuegoActivo) return;
-  // El central no hace nada en el minijuego por ahora
-  // lo podemos usar más adelante para algo especial
 }
 
 void botonMinijuegoDer() {
   if (!minijuegoActivo) return;
   if (carrilMascota < 2) {
-    tft.fillRect(0, Y_MASCOTA, 160, 16, COLOR_NEGRO);
+    tft.fillRect(0, Y_MASCOTA, 160, 16, COLOR_FONDO_LCD);
     carrilMascota++;
     dibujarMascotaJuego();
   }

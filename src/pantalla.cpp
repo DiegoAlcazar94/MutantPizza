@@ -2,13 +2,47 @@
 #include "minijuego.h"
 #include "sprites/sprites.h"
 #include "sonidos.h"
+#include <pgmspace.h>
 
 static uint8_t frameActual = 0;
 static int posX = 64; 
 static int dirX = 2;
 static bool necesidadRedibujarFondo = true;
 
+// Buffer en RAM para hacer la copia de seguridad de la zona donde se moverá la mascota (hasta 56x56)
+static uint16_t bufferFondoMascota[56 * 56]; 
+static int posXAnterior = 64;
+static int posYAnterior = 48;
+static int tamanoAnterior = 56;
+static bool primerRenderMascota = true;
+
 #define COLOR_FONDO_HUEVO 0xE734
+
+// 1. Guarda en la RAM los píxeles del fondo exactos donde se va a dibujar la mascota
+static void guardarFondoBajoMascota(int16_t x, int16_t y, int16_t w, int16_t h) {
+  tft.startWrite();
+  for (int16_t j = 0; j < h; j++) {
+    int16_t py = y + j;
+    if (py < 0 || py >= 128) continue;
+
+    for (int16_t i = 0; i < w; i++) {
+      int16_t px = x + i;
+      if (px < 0 || px >= 160) continue;
+
+      // Lectura desde Flash a la RAM solo en el área reducida de la mascota
+      bufferFondoMascota[j * w + i] = pgm_read_word(&Background[py * 160 + px]);
+    }
+  }
+  tft.endWrite();
+}
+
+// 2. Restaura desde la RAM la zona que fue pisada por la mascota en el frame anterior
+static void restaurarFondoMascota() {
+  if (primerRenderMascota) return; // Si es el primer frame, no hay nada que borrar
+
+  // Dibuja directo desde la RAM (súper rápido)
+  tft.drawRGBBitmap(posXAnterior, posYAnterior, bufferFondoMascota, tamanoAnterior, tamanoAnterior);
+}
 
 // Fuerza a que en el próximo frame se repinte el fondo y los iconos
 void forzarRedibujadoPantalla() {
@@ -37,7 +71,7 @@ static void obtenerSprite(const uint16_t** sprite, int* tamano) {
   switch (juego.fase) {
     case FASE_BEBE:
       *tamano = 32;
-      if (usarSleep)    *sprite = (frameActual == 0) ? Baby_Sleep1      : Baby_Sleep2;
+      if (usarSleep)    *sprite = (frameActual == 0) ? Baby_Sleep1    : Baby_Sleep2;
       else if (usarIll) *sprite = (frameActual == 0) ? Baby_Ill0_Sheet  : Baby_Ill1_Sheet;
       else              *sprite = (frameActual == 0) ? Baby_Idle0       : Baby_Idle1;
       break;
@@ -121,20 +155,19 @@ static void dibujarMascota() {
 
   int y = 20 + (88 - tamano) / 2;
 
-  // 1. DIBUJADO DE ESTRUCTURA FIJA (solo si venimos de otra pantalla o se selecciona icono)
+  // 1. GESTIÓN DEL FONDO
   if (necesidadRedibujarFondo) {
     dibujarFondo();
     dibujarIconos();
     necesidadRedibujarFondo = false;
+    primerRenderMascota = true;
   } else {
-    // 2. REPARAR SOLO EL ÁREA DONDE ESTABA LA MASCOTA EN EL FRAME ANTERIOR
-    // Redibuja solo el trozo del mapa de bits del fondo recortado a esa casilla
-    tft.drawRGBBitmap(posX - 4, y - 2, Background + (y - 2) * 160 + (posX - 4), tamano + 8, tamano + 4);
+    // Restauramos únicamente el área que tapaba la mascota antes desde la RAM
+    restaurarFondoMascota();
   }
 
-  // 3. MOVER MASCOTA
+  // 2. MOVER LA MASCOTA
   posX += dirX;
-
   if (posX <= 2) {
     posX = 2;
     dirX = -dirX;
@@ -143,10 +176,18 @@ static void dibujarMascota() {
     dirX = -dirX;
   }
 
-  // 4. DIBUJAR MASCOTA EN LA NUEVA POSICIÓN
+  // 3. RESPALDO DEL FONDO DE LA NUEVA POSICIÓN
+  guardarFondoBajoMascota(posX, y, tamano, tamano);
+
+  // Guardamos las coordenadas para el siguiente frame
+  posXAnterior = posX;
+  posYAnterior = y;
+  tamanoAnterior = tamano;
+  primerRenderMascota = false;
+
+  // 4. DIBUJAR MASCOTA Y TEXTOS/ALERTAS
   dibujarSprite(spriteActual, posX, y, tamano, tamano);
 
-  // 5. INDICADORES DE ESTADO (Temperatura, Dormir, Sucia, Enferma)
   if (juego.temperatura <= 2) {
     tft.setTextColor(COLOR_AZUL);
     tft.setTextSize(2);
@@ -374,7 +415,7 @@ static void dibujarEstadoAlterado() {
   tft.print("ESTADO ALTERADO");
   tft.setTextColor(COLOR_BLANCO);
   int y = 35;
-  if (juego.enferma)            { tft.setCursor(5, y); tft.print("! ENFERMA");           y += 15; }
+  if (juego.enferma)            { tft.setCursor(5, y); tft.print("! ENFERMA");            y += 15; }
   if (juego.sucia)              { tft.setCursor(5, y); tft.print("! SUCIA");              y += 15; }
   if (juego.desobediencia >= 4) { tft.setCursor(5, y); tft.print("! PELIGRO MALDICION"); y += 15; }
   if (juego.temperatura == 0)   { tft.setCursor(5, y); tft.print("! SIN TEMPERATURA");   y += 15; }

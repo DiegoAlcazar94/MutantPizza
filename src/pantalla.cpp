@@ -16,7 +16,7 @@ static int posYAnterior = 48;
 static int tamanoAnterior = 56;
 static bool primerRenderMascota = true;
 
-#define COLOR_FONDO_HUEVO 0xE734
+
 
 // 1. Guarda en la RAM los píxeles del fondo exactos donde se va a dibujar la mascota
 static void guardarFondoBajoMascota(int16_t x, int16_t y, int16_t w, int16_t h) {
@@ -218,20 +218,9 @@ static void dibujarMascota() {
 }
 
 // FASE HUEVO
-static int xBush1 = 20;
-static int xBush2 = 100;
 
 static void dibujarHuevo() {
   tft.fillRect(0, 0, 160, 128, COLOR_FONDO_HUEVO);
-
-  xBush1 -= 4;
-  xBush2 -= 4;
-
-  if (xBush1 > 160) xBush1 = -16;
-  if (xBush2 > 160) xBush2 = -16;
-
-  dibujarSprite(Deco_Bush, xBush1, 60, 16, 16);
-  dibujarSprite(Deco_Bush, xBush2, 60, 16, 16);
 
   int xRider = 48;
   int yRider = 30;

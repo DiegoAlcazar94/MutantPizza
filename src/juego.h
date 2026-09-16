@@ -22,18 +22,19 @@
 // COLORES
 // ============================================================
 #define COLOR_NEGRO     0x0000
-#define COLOR_BLANCO    0xFFFF
+#define COLOR_BLANCO    0xFF33
 #define COLOR_ROJO      0xF800
 #define COLOR_VERDE     0x07E0
 #define COLOR_AMARILLO  0xFFE0
 #define COLOR_GRIS      0x8410
 #define COLOR_NARANJA   0xFD20
 #define COLOR_AZUL      0x001F
+#define COLOR_FONDO_HUEVO 0xE734
 
 // ============================================================
 // TIEMPOS
 // ============================================================
-#define MS_TICK         60000UL
+#define MS_TICK         10000UL
 #define DIAS_BEBE       5
 #define MINUTOS_NACER   15
 #define HORA_DORMIR     23

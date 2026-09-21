@@ -420,7 +420,7 @@ static void dibujarMuerte() {
     juego.sonidoMuerteReproducido = true;
   }
 
-  tft.fillScreen(COLOR_BLANCO);
+  tft.fillScreen(COLOR_FONDO_HUEVO);
   dibujarSprite(frameActual == 0 ? Ghost_Frame0 : Ghost_Frame1, 20, 20, 32, 42);
 
   tft.setTextColor(COLOR_ROJO);

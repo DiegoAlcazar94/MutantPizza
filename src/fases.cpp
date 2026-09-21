@@ -91,28 +91,36 @@ void tickJuego() {
   juego.minutosEnFaseActual++;
 
   // Temperatura baja siempre
-  if (juego.temperatura > 0) juego.temperatura--;
+  if(juego.edadEnMinutos % 30 == 0){
+    if (juego.temperatura > 0) juego.temperatura--;
+  }
 
   // Felicidad baja si no duerme
-  if (!juego.durmiendo) {
+  if (!juego.durmiendo && (juego.edadEnMinutos % 45 =0 0)) {
     if (juego.felicidad > 0) juego.felicidad--;
   }
 
   // Energía
   if (juego.durmiendo && juego.luzApagada) {
-    if (juego.energia < 5) juego.energia++;
+    if(juego.edadEnMinutos % 15 == 0){
+      if (juego.energia < 5) juego.energia++;
+    }
   } else if (!juego.durmiendo) {
-    if (juego.energia > 0) juego.energia--;
+    if(juego.edadEnMinutos % 60 == 0){
+      if (juego.energia > 0) juego.energia--;
+    }
   }
 
-  // Suciedad cada 60 minutos
-  if (juego.edadEnMinutos % 60 == 0) {
+  // Suciedad 
+  if (juego.edadEnMinutos % 120 == 0) {
     if (!juego.sucia) juego.sucia = true;
   }
 
   // Desobediencia
-  if (juego.sucia   && juego.desobediencia < 5) juego.desobediencia++;
-  if (juego.enferma && juego.desobediencia < 5) juego.desobediencia++;
+  if(juego.edadEnMinutos % 90 == 0){
+    if (juego.sucia   && juego.desobediencia < 5) juego.desobediencia++;
+    if (juego.enferma && juego.desobediencia < 5) juego.desobediencia++;
+  }
 
   // Contadores diarios
   if (juego.edadEnMinutos % 1440 == 0) {

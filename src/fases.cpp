@@ -96,7 +96,7 @@ void tickJuego() {
   }
 
   // Felicidad baja si no duerme
-  if (!juego.durmiendo && (juego.edadEnMinutos % 45 =0 0)) {
+  if (!juego.durmiendo && (juego.edadEnMinutos % 45 == 0)) {
     if (juego.felicidad > 0) juego.felicidad--;
   }
 
